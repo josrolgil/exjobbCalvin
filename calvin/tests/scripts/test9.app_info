@@ -1,0 +1,111 @@
+{
+    "actors": {
+        "test9:a": {
+            "actor_type": "std.Counter", 
+            "args": {}, 
+            "signature": "331d33480afb9f997af83087126e59a40465429e050a8e469d69841007264264", 
+            "signature_desc": {
+                "actor_type": "std.Counter", 
+                "inports": [], 
+                "is_primitive": true, 
+                "outports": [
+                    "integer"
+                ]
+            }
+        }, 
+        "test9:b:d:delay": {
+            "actor_type": "std.Delay", 
+            "args": {
+                "delay": 0.1
+            }, 
+            "signature": "4a56aca6da5e9744a7315c41c2c279a49e7013ccbc9943d4f243190ec8f82ef5", 
+            "signature_desc": {
+                "actor_type": "std.Delay", 
+                "inports": [
+                    "token"
+                ], 
+                "is_primitive": true, 
+                "outports": [
+                    "token"
+                ]
+            }
+        }, 
+        "test9:b:d:id": {
+            "actor_type": "std.Identity", 
+            "args": {}, 
+            "signature": "1cd0b1f440ac8a5d1ed69108ebce63902b0383778da8ac2d9aa817f021665168", 
+            "signature_desc": {
+                "actor_type": "std.Identity", 
+                "inports": [
+                    "token"
+                ], 
+                "is_primitive": true, 
+                "outports": [
+                    "token"
+                ]
+            }
+        }, 
+        "test9:b:e:f": {
+            "actor_type": "std.Identity", 
+            "args": {}, 
+            "signature": "1cd0b1f440ac8a5d1ed69108ebce63902b0383778da8ac2d9aa817f021665168", 
+            "signature_desc": {
+                "actor_type": "std.Identity", 
+                "inports": [
+                    "token"
+                ], 
+                "is_primitive": true, 
+                "outports": [
+                    "token"
+                ]
+            }
+        }, 
+        "test9:b:e:g": {
+            "actor_type": "std.Identity", 
+            "args": {}, 
+            "signature": "1cd0b1f440ac8a5d1ed69108ebce63902b0383778da8ac2d9aa817f021665168", 
+            "signature_desc": {
+                "actor_type": "std.Identity", 
+                "inports": [
+                    "token"
+                ], 
+                "is_primitive": true, 
+                "outports": [
+                    "token"
+                ]
+            }
+        }, 
+        "test9:c": {
+            "actor_type": "io.StandardOut", 
+            "args": {}, 
+            "signature": "5d0b3f7d38f7673c5086b4fc85d8c3c73b8e177116dcfc561bc0806f4b5d24af", 
+            "signature_desc": {
+                "actor_type": "io.StandardOut", 
+                "inports": [
+                    "token"
+                ], 
+                "is_primitive": true, 
+                "outports": []
+            }
+        }
+    }, 
+    "connections": {
+        "test9:a.integer": [
+            "test9:b:e:f.token"
+        ], 
+        "test9:b:d:delay.token": [
+            "test9:c.token"
+        ], 
+        "test9:b:d:id.token": [
+            "test9:b:d:delay.token"
+        ], 
+        "test9:b:e:f.token": [
+            "test9:b:e:g.token"
+        ], 
+        "test9:b:e:g.token": [
+            "test9:b:d:id.token"
+        ]
+    }, 
+    "name": "test9.calvin", 
+    "valid": true
+}

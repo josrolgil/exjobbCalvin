@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/calvin.css">
+</head>
+<body>
+<!-- Tabbed menu -->
+<div class="tabs">
+    <ul class="tab-links">
+        <li class="active"><a href="#tabPeers"><h2>Runtimes</h2></a></li>
+        <li><a href="#tabApplications"><h2>Applications</h2></a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="tabPeers" class="tab active">
+            <h3>Runtimes</h3>
+            <table class="table table-bordered table-striped" id="peersTable">
+                <th align="left">ID</th>
+                <th align="left">Name</th>
+                <th align="left">URI</th>
+                <th align="left">Control URI</th>
+                <th align="left">Destroy</th>
+                <th align="left">Deploy application</th>
+            </table>
+            <h3>Attributes</h3>
+            <table class="table table-bordered table-striped" id="peerTable">
+            </table>
+            <h3>Connections</h3>
+            <table class="table table-bordered table-striped" id="connectionsTable">
+            </table>
+        </div>
+
+        <div id="tabApplications" class="tab">
+            <div id="applicationData">
+                <h2>Application</h2>
+                <input type="checkbox" id="chkDrawApplication" onchange="toggleDrawConnections()">Draw application graph<br>
+                &nbsp;&nbsp;<input type="checkbox" id="chkDrawConnections" disabled>Draw connections<br>
+                &nbsp;&nbsp;<input type="checkbox" id="chkShowPortNames" disabled>Show portnames<br>
+                <select id="applicationSelector" onchange="showApplication()"></select>
+                <table class="table table-bordered table-striped" id="applicationsTable"></table>
+                <h3>Actor</h3>
+                <select id="actorSelector" onchange="updateSelectedActor()"></select>
+                <table class="table table-bordered table-striped" id="actorsTable"></table>
+                <h3>Port</h3>
+                <select id="portSelector" onchange="showPort()"></select>
+                <table class="table table-bordered table-striped" id="actorPortsTable"></table>
+                <h3>Tokens</h3>
+                <table class="table table-bordered table-striped" id="actorPortFifoTable"></table>
+            </div>
+            <div id="applicationGraph"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Log data from runtimes -->
+<div id="logData">
+    <h3>Trace</h3>
+    <button class="btn btn-primary btn-xs" style="margin-left: 5px;" onclick="startLog()">Start trace</button>
+    <button class="btn btn-danger btn-xs" style="margin-left: 5px;" onclick="stopLog()">Stop trace</button>
+    <button class="btn btn-default btn-xs" style="margin-left: 5px;" onclick="clearLog()">Clear trace</button>
+    <table class="table table-bordered table-striped" id="logTable" align="left" width="1200">
+        <th align="left">Timestamp</th>
+        <th align="left">Node id</th>
+        <th align="left">Event type</th>
+        <th align="left">Id</th>
+        <th align="left">Name</th>
+        <th align="left">Type/Action/Peer</th>
+        <th align="left">Is shadow/Consumed</th>
+        <th align="left">Produced</th>
+        <th align="left">Action result</th>
+    </table>
+</div>
+
+<!-- Connect dialog -->
+<div id="connectDialog" title="Connect" style="display:none;" class="modal modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">Connect</h4>
+        </div>
+        <div class="modal-body">
+            <form>
+                <label for="connect_uri">Control URI:</label>
+                <br>
+                <input type="text" name="connect_uri" id="connect_uri" size="35" />
+                <br>
+                <label for="index_search">Peers index search</label>
+                <br>
+                <input type="text" name="index_search" id="index_search" size="35" />
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="connectHandler()">Connect</button>
+        </div>
+    </div>
+</div>
+
+<!-- Application deployment dialog -->
+<div id="deployDialog" title="Deploy application" style="display:none; width: 800px; height: 800px" class="modal modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">Deploy</h4>
+        </div>
+        <div class="modal-body">
+            <form>
+                <input type="file" id="fileInputDeploy" accept=".calvin">
+                <br>
+                <label for="deploy_script">Script:</label>
+                <br>
+                <textarea name="deploy_script" id="deploy_script" rows="20" cols="100"></textarea>
+                <br>
+                <label for="deploy_requirements">Requirements:</label>
+                <br>
+                <input type="file" id="fileInputMigrateApplication" accept=".deployjson">
+                <br>
+                <textarea name="migrate_reqs" id="migrate_reqs" rows="20" cols="100"></textarea>
+                <br>
+                <label for="script_name">Script name:</label>
+                <br>
+                <input type="text" name="script_name" id="script_name">
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="deployHandler()" data-dismiss="modal">Deploy</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Event log dialog -->
+<div id="traceDialog" title="Event trace filter" style="display:none; height: 300px; width: 300px;" class="modal modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">Event Trace Filter</h4>
+        </div>
+        <div class="modal-body">
+            <form>
+                <input type="checkbox" id="chkTraceActorFiring" onchange="toggleActionResult()" checked="">Actor firings<br>
+                &nbsp;&nbsp;<input type="checkbox" id="chkTraceActorFiringActionResult">Action result<br>
+                <input type="checkbox" id="chkTraceActorNew" checked="">Actor new<br>
+                <input type="checkbox" id="chkTraceActorDestroy" checked="">Actor destroy<br>
+                <input type="checkbox" id="chkTraceActorMigrate" checked="">Actor migrate<br>
+                <input type="checkbox" id="chkTraceApplicationNew" checked="">Application new<br>
+                <input type="checkbox" id="chkTraceApplicationDestroy" checked="">Application destroy<br>
+                Application: <select id="traceApplicationSelector"></select>
+                <br>
+                <label for="trace_size">Trace rows:</label>
+                <input type="number" name="trace_size" id="trace_size" value="30">
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="startTrace()">Start Trace</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Busy spinner -->
+<div id='spinner' class='spinner'></div>
+
+<!-- Dependencies -->
+<script src="lib/jquery.min.js"></script>
+<script src="lib/spin.js" type="text/javascript"></script>
+<script src="js/bootstrap.min.js" type="text/javascript"></script>
+<script src="js/d3.v3.min.js"></script>
+<script src="js/dagre-d3.min.js"></script>
+<script src="js/calvin.js" type="text/javascript"></script>
+</body>
+</html>
