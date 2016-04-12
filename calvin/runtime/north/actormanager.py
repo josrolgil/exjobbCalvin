@@ -60,7 +60,6 @@ class ActorManager(object):
         """
         _log.debug("class: %s args: %s state: %s, signature: %s" % (actor_type, args, state, signature))
         _log.analyze(self.node.id, "+", {'actor_type': actor_type, 'state': state})
-        print "\n IN ACTOR MANAGER NEW ", link_category
         try:
             if state:
                 a = self._new_from_state(actor_type, state, link_category)
@@ -156,7 +155,7 @@ class ActorManager(object):
                 state['_managed'].remove('credentials')
             except:
                 pass
-            #TODO TRANSLATION
+            #TODO TRANSLATION 
             a = self._new_actor(actor_type, actor_id=state['id'], credentials=credentials)
             if '_shadow_args' in state:
                 # We were a shadow, do a full init
