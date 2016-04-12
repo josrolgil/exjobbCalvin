@@ -45,7 +45,7 @@ class ActorManager(object):
         raise Exception("Actor '{}' not found".format(actor_id))
 
     def new(self, actor_type, args, state=None, prev_connections=None, connection_list=None, callback=None,
-            signature=None, credentials=None):
+            signature=None, credentials=None, link_category=None):
         """
         Instantiate an actor of type 'actor_type'. Parameters are passed in 'args',
         'name' is an optional parameter in 'args', specifying a human readable name.
@@ -60,10 +60,10 @@ class ActorManager(object):
         """
         _log.debug("class: %s args: %s state: %s, signature: %s" % (actor_type, args, state, signature))
         _log.analyze(self.node.id, "+", {'actor_type': actor_type, 'state': state})
-
+        print "\n IN ACTOR MANAGER NEW ", link_category
         try:
             if state:
-                a = self._new_from_state(actor_type, state)
+                a = self._new_from_state(actor_type, state, link_category)
             else:
                 a = self._new(actor_type, args, credentials)
         except Exception as e:
@@ -147,7 +147,7 @@ class ActorManager(object):
         return a
 
 
-    def _new_from_state(self, actor_type, state):
+    def _new_from_state(self, actor_type, state, link_category):
         """Return a restored actor in PENDING state, raises an exception on failure."""
         try:
             _log.analyze(self.node.id, "+", state)
@@ -156,6 +156,7 @@ class ActorManager(object):
                 state['_managed'].remove('credentials')
             except:
                 pass
+            #TODO TRANSLATION
             a = self._new_actor(actor_type, actor_id=state['id'], credentials=credentials)
             if '_shadow_args' in state:
                 # We were a shadow, do a full init

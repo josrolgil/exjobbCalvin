@@ -52,6 +52,7 @@ class CalvinLink(object):
             # TODO chose the delay based on RTT instead of arbitrary 3 seconds
             _log.analyze(self.rt_id, "+ DELAYED LINK CLOSE", {})
             async.DelayedCall(3.0, old_link.close)
+        self.transport_category=None
 
     def reply_handler(self, payload):
         """ Gets called when a REPLY messages arrives on this link """
@@ -108,6 +109,12 @@ class CalvinLink(object):
         """ Disconnect the transport and hence the link object won't work anymore """
         _log.analyze(self.rt_id, "+ LINK", {})
         self.transport.disconnect()
+
+    def set_transport_category(self, category):
+        self.transport_category=category
+
+    def get_transport_category(self):
+        return self.transport_category
 
 
 class CalvinNetwork(object):
@@ -205,7 +212,6 @@ class CalvinNetwork(object):
         # For each URI and when available a peer id
         if not (corresponding_peer_ids and len(uris) == len(corresponding_peer_ids)):
             corresponding_peer_ids = [None] * len(uris)
-
         for uri, peer_id in zip(uris, corresponding_peer_ids):
             if not (uri in self.pending_joins or peer_id in self.pending_joins_by_id or peer_id in self.links):
                 # No simultaneous join detected
@@ -220,6 +226,7 @@ class CalvinNetwork(object):
                     # Ask the transport plugin to do the join
                     _log.analyze(self.node.id, "+ TRANSPORT", {'uri': uri, 'peer_id': peer_id}, peer_node_id=peer_id)
                     self.transports[schema].join(uri)
+
             else:
                 # We have simultaneous joins
                 _log.analyze(self.node.id, "+ SIMULTANEOUS", {'uri': uri, 'peer_id': peer_id}, peer_node_id=peer_id)
@@ -266,6 +273,7 @@ class CalvinNetwork(object):
                 # We requested it and we have highest node id, hence the one in links is the peer's and we replace it
                 _log.analyze(self.node.id, "+ REPLACE ORGINATOR", {'uri': uri, 'peer_id': peer_id}, peer_node_id=peer_id)
                 self.links[peer_id] = CalvinLink(self.node.id, peer_id, tp_link, self.links[peer_id])
+                self.links[peer_id].set_transport_category(tp_link.get_transport_category())
             elif is_orginator and self.node.id < peer_id:
                 # We requested it and peer have highest node id, hence the one in links is peer's and we close this new
                 _log.analyze(self.node.id, "+ DROP ORGINATOR", {'uri': uri, 'peer_id': peer_id}, peer_node_id=peer_id)
@@ -277,11 +285,13 @@ class CalvinNetwork(object):
             elif not is_orginator and self.node.id < peer_id:
                 # Peer requested it and peer have highest node id, hence the one in links is ours and we replace it
                 _log.analyze(self.node.id, "+ REPLACE", {'uri': uri, 'peer_id': peer_id}, peer_node_id=peer_id)
-                self.links[peer_id] = CalvinLink(self.node.id, peer_id, tp_link, self.links[peer_id])
+                self.links[peer_id] = CalvinLink(self.node.id, peer_id, tp_link, self.f[peer_id])
+                self.links[peer_id].set_transport_category(tp_link.get_transport_category())
         else:
             # No simultaneous join detected, just add the link
             _log.analyze(self.node.id, "+ INSERT", {'uri': uri, 'peer_id': peer_id}, peer_node_id=peer_id, tb=True)
             self.links[peer_id] = CalvinLink(self.node.id, peer_id, tp_link)
+            self.links[peer_id].set_transport_category(tp_link.get_transport_category())
 
         # Find and call any callbacks registered for the uri or peer id
         _log.debug("%s: peer_id: %s, uri: %s\npending_joins_by_id: %s\npending_joins: %s" % (self.node.id, peer_id,
@@ -370,3 +380,7 @@ class CalvinNetwork(object):
 
     def list_links(self):
         return list(self.links.keys())
+
+    def link_get_transport_category(self, peer_id):
+        """ Get a link by node id and its transport category"""
+        return self.links.get(peer_id, None).get_transport_category()

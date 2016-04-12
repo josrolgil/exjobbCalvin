@@ -18,7 +18,7 @@ from calvin.utilities import calvinlogger
 from twisted.twisted_transport import TwistedCalvinServer, TwistedCalvinTransport
 from calvin.runtime.south.plugins.transports import base_transport
 from calvin.runtime.south.plugins.transports.lib.twisted import twisted_transport
-
+from calvin.utilities import calvinconfig
 _log = calvinlogger.get_logger(__name__)
 
 
@@ -29,13 +29,13 @@ class CalvinTransportFactory(base_transport.BaseTransportFactory):
         self._peers = {}
         self._servers = {}
         self._callbacks = callbacks
-
     def _peer_connected(self):
         pass
 
     def join(self, uri):
         """docstring for join"""
         schema, peer_addr = uri.split(':', 1)
+
         if schema != 'calvinip':
             raise Exception("Cant handle schema %s!!" % schema)
 
@@ -75,3 +75,4 @@ class CalvinTransportFactory(base_transport.BaseTransportFactory):
         except:
             _log.exception("Error starting server")
             raise
+    

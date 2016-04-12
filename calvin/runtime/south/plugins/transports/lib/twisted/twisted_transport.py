@@ -18,12 +18,22 @@ from calvin.utilities.calvin_callback import CalvinCB
 from calvin.utilities import calvinlogger
 from calvin.utilities import calvinuuid
 from calvin.runtime.south.plugins.transports import base_transport
+from calvin.utilities import calvinconfig
+_conf = calvinconfig.get()
 
 _log = calvinlogger.get_logger(__name__)
 
 _join_request_reply = {'cmd': 'JOIN_REPLY', 'id': None, 'sid': None, 'serializer': None}
 _join_request = {'cmd': 'JOIN_REQUEST', 'id': None, 'sid': None, 'serializers': []}
 
+def check_list(peer, peers_in_list):
+    """ This function finds a peer in the list. If it is found, returns True otherwise False.
+        It is used for find an address in a peers domain, such that if it is found it signify it belongs to the same domain. """
+    found=False
+    for elements in peers_in_list:
+        if peer in peers_in_list:
+            found=True
+    return found
 
 class CalvinTransport(base_transport.BaseTransport):
     def __init__(self, rt_id, remote_uri, callbacks, transport, proto=None):
@@ -35,6 +45,12 @@ class CalvinTransport(base_transport.BaseTransport):
         self._coder = None
         self._transport = transport(self._uri.hostname, self._uri.port, callbacks, proto=proto)
         self._rtt = 2000  # Init rt in ms
+        #FAKE TLS ~ TRANSPORT
+        peers_in_domain = _conf.get("security","peers_in_domain")
+        if check_list(remote_uri, peers_in_domain):
+                self._transport_category="intradomain"
+        else:
+                self._transport_category="interdomain"
 
         # TODO: This should be incoming param
         self._verify_client = lambda x: True
@@ -55,6 +71,7 @@ class CalvinTransport(base_transport.BaseTransport):
         self._transport.callback_register("data", CalvinCB(self._data_received))
         # TODO: set timeout
         self._transport.join()
+        
 
     def disconnect(self, timeout=10):
         # TODO: Set timepout
@@ -182,6 +199,11 @@ class CalvinTransport(base_transport.BaseTransport):
             _log.exception("Message decode failed")
         self._callback_execute('data_received', self, data_obj)
 
+    def set_transport_category(self,category):
+        self._transport_category=category
+
+    def get_transport_category(self):
+        return self._transport_category
 
 class CalvinServer(base_transport.BaseServer):
     def __init__(self, rt_id, listen_uri, callbacks, server_transport, client_transport):

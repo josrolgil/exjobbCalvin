@@ -223,6 +223,7 @@ class CalvinProto(CalvinCBClass):
         if status:
             msg = {'cmd': 'ACTOR_NEW',
                    'state':{'actor_type': actor_type, 'actor_state': state, 'prev_connections':prev_connections}}
+            #print "\n IN _ACTOR_NEW, categ: ", self.network.links[to_rt_uuid]
             self.network.links[to_rt_uuid].send_with_reply(callback, msg)
         elif callback:
             callback(status=status)
@@ -230,11 +231,13 @@ class CalvinProto(CalvinCBClass):
     def actor_new_handler(self, payload):
         """ Peer request new actor with state and connections """
         _log.analyze(self.rt_id, "+", payload, tb=True)
+        kwargs = {}
+        kwargs['link_category'] = self.network.links[payload['from_rt_uuid']].get_transport_category()
         self.node.am.new(payload['state']['actor_type'],
                          None,
                          payload['state']['actor_state'],
                          payload['state']['prev_connections'],
-                         callback=CalvinCB(self._actor_new_handler, payload))
+                         callback=CalvinCB(self._actor_new_handler, payload), **kwargs)
 
     def _actor_new_handler(self, payload, status, **kwargs):
         """ Potentially created actor, reply to requesting node """
