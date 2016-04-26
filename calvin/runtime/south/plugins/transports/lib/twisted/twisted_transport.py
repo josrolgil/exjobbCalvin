@@ -26,13 +26,18 @@ _log = calvinlogger.get_logger(__name__)
 _join_request_reply = {'cmd': 'JOIN_REPLY', 'id': None, 'sid': None, 'serializer': None}
 _join_request = {'cmd': 'JOIN_REQUEST', 'id': None, 'sid': None, 'serializers': []}
 
-def check_list(peer, peers_in_list):
+def check_list(peer):
     """ This function finds a peer in the list. If it is found, returns True otherwise False.
         It is used for find an address in a peers domain, such that if it is found it signify it belongs to the same domain. """
-    found=False
-    for elements in peers_in_list:
-        if peer in peers_in_list:
-            found=True
+    #For security reasons, default is interdomain.
+    peers_in_list=_conf.get("security","peers_in_domain")
+    found="interdomain"
+    if not peers_in_list:
+        found=_conf.get("security", "fake_transport")
+    else:
+        for elements in peers_in_list:
+            if peer in peers_in_list:
+                found="intradomain"
     return found
 
 class CalvinTransport(base_transport.BaseTransport):
@@ -46,12 +51,7 @@ class CalvinTransport(base_transport.BaseTransport):
         self._transport = transport(self._uri.hostname, self._uri.port, callbacks, proto=proto)
         self._rtt = 2000  # Init rt in ms
         #FAKE TLS ~ TRANSPORT
-        peers_in_domain = _conf.get("security","peers_in_domain")
-        if check_list(remote_uri, peers_in_domain):
-                self._transport_category="intradomain"
-        else:
-                self._transport_category="interdomain"
-
+        self._transport_category=check_list(remote_uri)
         # TODO: This should be incoming param
         self._verify_client = lambda x: True
 

@@ -66,7 +66,6 @@ class CalvinTransportFactory(base_transport.BaseTransportFactory):
 
         if uri in self._servers:
             raise Exception("Server already started!!" % uri)
-
         try:
             tp = twisted_transport.CalvinServer(
                 self._rt_id, uri, self._callbacks, TwistedCalvinServer, TwistedCalvinTransport)

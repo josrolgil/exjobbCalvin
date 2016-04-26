@@ -100,6 +100,7 @@ class TwistedCalvinTransport(base_transport.CalvinTransportBase):
     def __init__(self, host, port, callbacks=None, proto=None, *args, **kwargs):
         super(TwistedCalvinTransport, self).__init__(host, port, callbacks=callbacks)
         self._host_ip = host
+        print "\in TWISTEDCALVINTR :",host, port
         self._host_port = port
         self._proto = proto
         self._factory = None

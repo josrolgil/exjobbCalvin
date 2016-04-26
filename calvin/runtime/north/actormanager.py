@@ -22,8 +22,10 @@ from calvin.utilities.calvin_callback import CalvinCB
 import calvin.requests.calvinresponse as response
 from calvin.utilities.security import Security
 from calvin.actor.actor import ShadowActor
-
+from calvin.utilities import calvinconfig
+from calvin.utilities import translation
 _log = get_logger(__name__)
+_conf = calvinconfig.get()
 
 
 def log_callback(reply, **kwargs):
@@ -39,6 +41,8 @@ class ActorManager(object):
         super(ActorManager, self).__init__()
         self.actors = {}
         self.node = node
+        if _conf:
+            self.migration_policy = translation.TranslationPolicy(_conf.get("security","security_conf")['translation']['policy_storage_file'])
 
     def _actor_not_found(self, actor_id):
         _log.exception("Actor '{}' not found".format(actor_id))
@@ -155,7 +159,12 @@ class ActorManager(object):
                 state['_managed'].remove('credentials')
             except:
                 pass
-            #TODO TRANSLATION 
+            if link_category=="interdomain" and credentials:
+                print "\n ENTER POINT"
+                user=credentials['user']
+                if self.migration_policy.no_cheating(user[user.find("@")+1:len(user)], _conf.get("security", "domain"), link_category):
+                    print "\n BEFORE TRANSLATION"
+                    credentials = self.migration_policy.translate(user)             
             a = self._new_actor(actor_type, actor_id=state['id'], credentials=credentials)
             if '_shadow_args' in state:
                 # We were a shadow, do a full init

@@ -192,6 +192,7 @@ class PolicyDecisionPoint(object):
                 if "target" not in policy or self.target_matches(policy["target"], request):
                     # Get a policy decision if target matches.
                     decision, obligations = self.policy_decision(policy, request)
+                    _log.info("decisions: %s" % decision)
                     if ((decision == "permit" and not obligations and self.config["policy_combining"] == "permit_overrides") or 
                       (decision == "deny" and self.config["policy_combining"] == "deny_overrides")):
                         # Stop checking further rules.
@@ -234,7 +235,7 @@ class PolicyDecisionPoint(object):
                         # Same value should be used for future tests in this policy or other policies when handling this request.
                         request_value = self.pip.get_attribute_value(attribute_type, attribute)
                     except KeyError:
-                        _log.debug("PolicyDecisionPoint: Attribute not found: %s %s" % (attribute_type, attribute))
+                        _log.info("PolicyDecisionPoint: Attribute not found: %s %s" % (attribute_type, attribute))
                         return False  # Or 'indeterminate' (if MustBePresent is True and none of the other targets return False)?
                 # Accept both single object and lists by turning single objects into a list.
                 if not isinstance(request_value, list):
@@ -247,11 +248,11 @@ class PolicyDecisionPoint(object):
                     # Regular expressions are allowed for strings in policies 
                     # (re.match checks for a match at the beginning of the string, $ marks the end of the string).
                     if not any([re.match(r+'$', x) for r in policy_value for x in request_value]):
-                        _log.debug("PolicyDecisionPoint: Not matching: %s %s %s" % (attribute_type, attribute, policy_value))
+                        _log.info("PolicyDecisionPoint: Not matching: %s %s %s" % (attribute_type, attribute, policy_value))
                         return False
                 except TypeError:  # If the value is not a string
                     if set(request_value).isdisjoint(policy_value):
-                        _log.debug("PolicyDecisionPoint: Not matching: %s %s %s" % (attribute_type, attribute, policy_value))
+                        _log.info("PolicyDecisionPoint: Not matching: %s %s %s" % (attribute_type, attribute, policy_value))
                         return False
         # True is returned if every attribute in the policy target matches the corresponding request attribute.
         return True
