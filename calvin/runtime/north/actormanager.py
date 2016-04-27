@@ -160,11 +160,10 @@ class ActorManager(object):
             except:
                 pass
             if link_category=="interdomain" and credentials:
-                print "\n ENTER POINT"
                 user=credentials['user']
                 if self.migration_policy.no_cheating(user[user.find("@")+1:len(user)], _conf.get("security", "domain"), link_category):
-                    print "\n BEFORE TRANSLATION"
-                    credentials = self.migration_policy.translate(user)             
+                    credentials['user'] = self.migration_policy.translate(user)
+                    _log.info("Translation committed: %s to %s " % (user, credentials['user']))             
             a = self._new_actor(actor_type, actor_id=state['id'], credentials=credentials)
             if '_shadow_args' in state:
                 # We were a shadow, do a full init
