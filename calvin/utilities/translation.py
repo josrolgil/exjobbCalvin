@@ -2,11 +2,12 @@ import json
 from calvin.utilities import calvinconfig
 from calvin.utilities import calvinlogger
 _log = calvinlogger.get_logger(__name__)
-_conf = calvinconfig.get()
 
-#policy_file=_conf.get("security","security_conf")['translation']['policy_storage_file']
 
 class TranslationPolicy:
+""" This class reads a translation policy file, 
+and provides a translation function to a identifier.
+"""
 	def __init__(self, policy_file):
 		try:
 			json_policy=open(policy_file, 'r')
@@ -25,6 +26,8 @@ class TranslationPolicy:
 		return self.description
 
 	def translate(self, identifier):
+""" Translates identifier to a new value regarding the policy loaded.
+"""
 		#TODO: check the id format is ok.
 		domain=identifier[identifier.find("@")+1:len(identifier)]
 		flag=False
@@ -49,10 +52,10 @@ class TranslationPolicy:
 		return new_id
 
 	def no_cheating(self, identifier_domain, domain, link_category):
-		"""An interdomain transport can not have an identifier of the target domain."""	
+""" Returns true if there is no cheating: the coming identifier's domain is different from the host domain
+"""	
 		if link_category == "interdomain":
 			if identifier_domain == domain:
 				raise Exception('\nTried to cheat during the translation.')
 				return False
 		return True
-#identifier[identifier.find("@")+1:len(identifier)]

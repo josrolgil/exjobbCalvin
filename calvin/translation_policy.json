@@ -1,20 +1,17 @@
 {
 	"id": "translation_policy",
 	"description": "Policy managing the translation done to cross a domain.",
-	"rule_combining": "permit_overrides",
 	"rules": [
 		{
 			"id": "policy4_rule1",
 			"description": "Permit if policy target matches",
-			"effect": "permit",
 			"translation_category":"domain",
-			"source":["ericsson", "google"],
+			"source":["ericsson", "google", "test"],
 			"result": "friendguest@test"
 		},
 		{
 			"id": "policy4_rule2",
 			"description": "Permit if policy target matches",
-			"effect": "permit",
 			"translation_category":"identifier",
 			"source":["ben@lth"],
 			"result": "ben@test"
@@ -22,7 +19,6 @@
 		{
 			"id": "policy4_rule3",
 			"description": "Permit if policy target matches",
-			"effect": "permit",
 			"translation_category":"default",
 			"result": "guest@test"	
 		}
