@@ -27,9 +27,10 @@ _join_request_reply = {'cmd': 'JOIN_REPLY', 'id': None, 'sid': None, 'serializer
 _join_request = {'cmd': 'JOIN_REQUEST', 'id': None, 'sid': None, 'serializers': []}
 
 def check_list(peer):
-    #TODO: PEERSINLIST JUST FOR IP (NO PORTS)
     """ This function finds a peer in the list. If it is found, returns True otherwise False.
         It is used for find an address in a peers domain, such that if it is found it signify it belongs to the same domain. """
+    #The port is eliminated from the calvinip: calvinip://1.1.1.1:80 to calvinip://1.1.1.1
+    peer=peer[0:peer.rfind(":")]
     #For security reasons, default is interdomain.
     peers_in_list=_conf.get("security","peers_in_domain")
     found="interdomain"

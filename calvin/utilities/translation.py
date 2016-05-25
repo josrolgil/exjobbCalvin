@@ -5,9 +5,8 @@ _log = calvinlogger.get_logger(__name__)
 
 
 class TranslationPolicy:
-""" This class reads a translation policy file, 
-and provides a translation function to a identifier.
-"""
+	""" This class reads a translation policy file, 
+	and provides a translation function to a identifier."""
 	def __init__(self, policy_file):
 		try:
 			json_policy=open(policy_file, 'r')
@@ -26,8 +25,8 @@ and provides a translation function to a identifier.
 		return self.description
 
 	def translate(self, identifier):
-""" Translates identifier to a new value regarding the policy loaded.
-"""
+		""" Translates identifier to a new value regarding the policy loaded.
+		"""
 		#TODO: check the id format is ok.
 		domain=identifier[identifier.find("@")+1:len(identifier)]
 		flag=False
@@ -52,8 +51,8 @@ and provides a translation function to a identifier.
 		return new_id
 
 	def no_cheating(self, identifier_domain, domain, link_category):
-""" Returns true if there is no cheating: the coming identifier's domain is different from the host domain
-"""	
+		""" Returns true if there is no cheating: the coming identifier's domain is different from the host domain
+		"""	
 		if link_category == "interdomain":
 			if identifier_domain == domain:
 				raise Exception('\nTried to cheat during the translation.')

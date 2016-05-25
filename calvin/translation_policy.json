@@ -6,15 +6,15 @@
 			"id": "policy4_rule1",
 			"description": "Permit if policy target matches",
 			"translation_category":"domain",
-			"source":["ericsson", "google", "test"],
+			"source":["google", "amazon"],
 			"result": "friendguest@test"
 		},
 		{
 			"id": "policy4_rule2",
 			"description": "Permit if policy target matches",
 			"translation_category":"identifier",
-			"source":["ben@lth"],
-			"result": "ben@test"
+			"source":["user1@lth"],
+			"result": "user4@test"
 		},
 		{
 			"id": "policy4_rule3",
